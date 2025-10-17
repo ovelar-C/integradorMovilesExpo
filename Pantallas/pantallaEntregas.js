@@ -21,7 +21,6 @@ export default function Entregas({ navigation }) {
 
     }, []);
 
-
     const cargarUbicacion = async () => {
         try {
             const coords = await SecureStore.getItemAsync('ubicacion');
