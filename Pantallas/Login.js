@@ -165,14 +165,14 @@ const styles = StyleSheet.create({
 });
 */
 import { useState } from "react";
-import { Text, View, TextInput, StyleSheet, Button } from "react-native";
+import { Text, View, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import * as SecureStore from 'expo-secure-store';
 import { setDoc, doc } from 'firebase/firestore';
 
-import { validarEdad, verificarEmail } from "../validaciones/validar";
+import { validarEdad, verificarEmail } from "../validaciones y Permisos/validar";
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -180,11 +180,11 @@ export default function Login() {
     const [nombre, setNombre] = useState('');
     const [edad, setEdad] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    
+
 
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
-    
+
     const toggleModal = () => setModalVisible(!isModalVisible);
 
     const showModal = (message) => {
@@ -244,19 +244,19 @@ export default function Login() {
             const user = userCredential.user;
 
             try {
-                 await setDoc(doc(db, 'usuarios', user.uid), {
-                nombre: nombre,
-                email: email,
-                edad: edad,
-                descripcion: descripcion,
-            });    
+                await setDoc(doc(db, 'usuarios', user.uid), {
+                    nombre: nombre,
+                    email: email,
+                    edad: edad,
+                    descripcion: descripcion,
+                });
             } catch (error) {
-                console.log("error al usar setDoc". error);
+                console.log("error al usar setDoc".error);
             }
-            
+
             console.log("antes de guardarDatosUsuarios");
             await guardarDatosUsuario(user.uid, nombre, email, edad, descripcion);
-                console.log('DATOS ANTES DE guardar en SecureStore:', { uid, nombre, email, edad, descripcion });
+            console.log('DATOS ANTES DE guardar en SecureStore:', { uid, nombre, email, edad, descripcion });
 
             showModal("Cuenta creada correctamente");
         } catch (error) {
@@ -267,39 +267,45 @@ export default function Login() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.textoLogin}>
-                LA MEJOR PANTALLA DE LOGIN QUE VAS A VER EN TODA TU VIDA :D
-            </Text>
+        <View style={styles.contenedor}>
+            <View style={styles.contenedorTitulo}>
+                <Text style={styles.titulo}>
+                    LOGIN
+                </Text>
+            </View>
 
             <View style={styles.textInput}>
-                <Text>Nombre:</Text>
+                <Text style={styles.textos}>NOMBRE:</Text>
                 <TextInput
                     value={nombre}
                     onChangeText={setNombre}
                     style={styles.input}
                 />
-                <Text>Email:</Text>
+                <Text style={styles.textos}>EMAIL:</Text>
+
                 <TextInput
                     value={email}
                     onChangeText={setEmail}
                     style={styles.input}
                 />
-                <Text>Edad:</Text>
+                <Text style={styles.textos}>EDAD:</Text>
+
                 <TextInput
                     value={edad}
                     onChangeText={setEdad}
                     style={styles.input}
                     keyboardType="numeric"
                 />
-                <Text>Contraseña:</Text>
+                <Text style={styles.textos}>CONTRASEÑA:</Text>
+
                 <TextInput
                     value={password}
                     onChangeText={setPassword}
                     style={styles.input}
                     secureTextEntry
                 />
-                <Text>Descripción:</Text>
+                <Text style={styles.textos}>DESCRIPCION:</Text>
+
                 <TextInput
                     value={descripcion}
                     onChangeText={setDescripcion}
@@ -307,14 +313,24 @@ export default function Login() {
                 />
             </View>
 
-            <Button title="Iniciar sesión" onPress={signIn} />
-            <Button title="Crear cuenta" onPress={signUp} />
+            <TouchableOpacity style={styles.boton}
+                onPress={signUp}>
+                <Text style={styles.botonText}> CREAR CUENTA</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.boton}
+                onPress={signIn}>
+                <Text style={styles.botonText}> INICIAR SESIÓN</Text>
+            </TouchableOpacity>
 
             {/* aca se personaliza los modales para las alertas */}
             <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalText}>{modalMessage}</Text>
-                    <Button title="Cerrar" onPress={toggleModal} />
+
+                    <TouchableOpacity style={styles.modalText}
+                        onPress={toggleModal}
+                        title="cerrar">
+                    </TouchableOpacity>
                 </View>
             </Modal>
 
@@ -323,40 +339,78 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-    container: {
+    contenedor: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#f8f9fa',
+        justifyContent: 'flex-start',
+        backgroundColor: 'yellow',
+        paddingHorizontal: 20,
+        paddingTop: 40,
     },
-    textoLogin: {
-        backgroundColor: '#90ebebff',
+    contenedorTitulo: {
+        marginBottom: 10,
+        justifyContent:'center',
+    },
+    titulo: {
         textAlign: 'center',
+        padding: 15,
+        backgroundColor: '#66bd1fff',
+        color: 'white',
+        marginVertical: 10,
+        borderRadius: 12,
+        fontWeight: 'bold',
+        fontSize: 16,
+
+    },
+    textos:{
+        fontWeight: 'bold',
+        color:'#58290a'
     },
     textInput: {
-        backgroundColor: '#a4f0c4ff',
-        width: '100%',
-        alignItems: 'center',
+        backgroundColor: '#fa9551ff',
+        borderRadius: 15,
         padding: 20,
-        borderWidth: 3,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        alignItems: 'center'
     },
     input: {
         backgroundColor: 'white',
         borderRadius: 8,
-        width: '90%',
-        marginVertical: 10,
+        width: '100%',
+        marginVertical: 8,
         padding: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
+    boton: {
+        backgroundColor: '#007AFF',
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        borderRadius: 25,
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    botonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
     },
     modalContent: {
         backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
+        padding: 25,
+        borderRadius: 15,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     modalText: {
         fontSize: 18,
-        marginBottom: 20,
         color: '#333',
+        marginBottom: 20,
+        textAlign: 'center',
     },
 });
+

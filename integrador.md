@@ -1,6 +1,27 @@
+🚗 4. App de “Delivery / Reparto”
+
+Idea: Registrar entregas con foto del paquete y coordenadas de entrega.
+Librerías:
+expo-location (modo background si necesitas seguimiento)
+expo-camera (foto de confirmación)
+expo-notifications (avisos al repartidor o cliente)
+
+# utilizar camara, ubicacion y mapa
+- registrar cada entrega (foto y coordenadas);
+- cuando se entrega un producto poder sacar una foto y guardarla
+- boton de entregar producto : 
+    Sacar y guardar foto y capturar la ubicacion y guardarlas en los registros,
+    aplicar tambíen agregar un boton que muestre el mapa cuando se entregue el producto
+
+
+
+
+
+
+
 # InicioScreen: Bienvenida y acceso a la app.
 
-PerfilScreen: Mostrar nombre, edad, foto de perfil y coordenadas.
+# PerfilScreen: Mostrar nombre, edad, foto de perfil y coordenadas.
 
 EditarPerfilScreen: Editar datos personales y cambiar foto.
 
@@ -30,7 +51,7 @@ NuevoViajeScreen: Capturar ubicación y crear nuevo registro.
 
 [#]Ver y editar su perfil.
 
-[]Consultar su ubicación actual (latitud/longitud).
+[#]Consultar su ubicación actual (latitud/longitud).
 
 []Guardar un “registro de viaje” y coordenadas.
 

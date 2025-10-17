@@ -10,9 +10,6 @@ export default function TuPerfil({ navigation }) {
     const [datos, setDatos] = useState(null);
     const [coordenadas, setCoordenadas] = useState(null);
 
-
-
-
     useEffect(() => {
         const user = auth.currentUser;
         if (user) {
@@ -25,16 +22,6 @@ export default function TuPerfil({ navigation }) {
         //listarDatosSecureStore();
 
     }, []);
-
-
-    const listarDatosSecureStore = async () => {
-        const uid = auth.currentUser.uid;
-        const nombre = await SecureStore.getItemAsync(`nombre_${uid}`);
-        const edad = await SecureStore.getItemAsync(`edad_${uid}`);
-        const descripcion = await SecureStore.getItemAsync(`descripcion_${uid}`);
-        console.log("HOLAAAAAAAAAA", { nombre, edad, descripcion });
-    }
-
 
     const cargarUbicacion = async () => {
         try {

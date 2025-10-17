@@ -1,32 +1,43 @@
 import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { auth, db} from '../firebase';
+import { auth, db } from '../firebase';
+import * as SecureStore from 'expo-secure-store';
 
 
+
+//SACAR EL BOTON DE UBICACIONES
 
 export default function Inicio({ navigation }) {
+
+    const cerrarSesion = async () => {
+        console.log("funcion cerrar sesion")
+        try {
+            await auth.signOut(); // cerrar sesión
+            await SecureStore.deleteItemAsync('ubicacion'); // eliminar la ubicación guardada
+            console.log("Sesión cerrada y ubicación eliminada");
+        } catch (error) {
+            console.error("Error al cerrar sesión:", error);
+        }
+
+    }
     return (
         <View style={styles.contenedor}>
             <Text style={styles.titulo}>
-                BIENVENIDO AL INICIO DE LA MEJOR APP QUE VAS A VER EN TU VIDA :D
+                BIENVENIDO A INICIO
             </Text>
 
             <TouchableOpacity style={styles.boton}
                 onPress={() => navigation.navigate('TuPerfil')}>
                 <Text style={styles.botonText}>TU PERFIL</Text>
             </TouchableOpacity>
-           
-            <TouchableOpacity style={styles.boton}
-                onPress={() => navigation.navigate('GeoPantalla')}>
-                <Text style={styles.botonText}>UBICACIONES</Text>
-            </TouchableOpacity>
+
 
             <TouchableOpacity style={styles.boton}
-                onPress={() => navigation.navigate('ViajesPantalla')}>
-                <Text style={styles.botonText}>VIAJES</Text>
+                onPress={() => navigation.navigate('Delivery')}>
+                <Text style={styles.botonText}>DELIVERY</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.botonCerrar}
-                onPress={()=> auth.signOut()} >
+                onPress={cerrarSesion} >
                 <Text style={styles.botonText}>CERRAR SESION</Text>
             </TouchableOpacity>
 
@@ -78,9 +89,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-    alien:{
-        width: 5.0, 
-        height: 20 ,
-        marginTop:30,
+    alien: {
+        width: 5.0,
+        height: 20,
+        marginTop: 30,
     }
 });

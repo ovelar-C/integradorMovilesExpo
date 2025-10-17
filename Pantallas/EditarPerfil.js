@@ -2,7 +2,7 @@ import { Text, View, TextInput, Button, TouchableOpacity, Alert, StyleSheet } fr
 import { useState } from "react";
 import { auth } from "../firebase";
 import { actualizarPerfil } from "../servicios/servicioFirebase";
-import { validarEdad } from "../validaciones/validar";
+import { validarEdad } from "../validaciones y Permisos/validar";
 
 export default function EditarPerfil({ navigation }) {
     const [nombre, setNombre] = useState('');
@@ -19,8 +19,11 @@ export default function EditarPerfil({ navigation }) {
         }
 
         const datos = { nombre, edad, descripcion };
-
-        if (!nombre || !edad || !descripcion) {
+        if(!nombre && edad){
+            Alert.alert("los campos nombre y edad son obligatorios");
+            return;
+        }
+        if (!nombre && !edad && !descripcion) {
             Alert.alert("completa los campos por favor te lo suplico");
             return
         }

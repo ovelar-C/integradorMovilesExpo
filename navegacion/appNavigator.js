@@ -4,14 +4,13 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 //importacion de las pantallas a usar
-import Inicio from '../Pantallas/pantallaInicio';
-import MisViajes from '../Pantallas/pantallaMisViajes';
-import NuevoViaje from '../Pantallas/pantallaNuevoViaje';
-import Login from '../Pantallas/pantallaLogin';
-import EditarPerfil from '../Pantallas/pantallaEditarPerfil';
+import Inicio from '../Pantallas/Inicio';
+import Entregas from '../Pantallas/pantallaEntregas';
+import Login from '../Pantallas/Login';
+import EditarPerfil from '../Pantallas/EditarPerfil';
 import Mapa from '../Pantallas/Mapa';
-import TuPerfil from '../Pantallas/pantallaPerfil'
-import ViajesPantalla from '../Pantallas/pantallaViajes'
+import TuPerfil from '../Pantallas/Perfil'
+import Delivery from '../Pantallas/Delivery'
 import GeoPantalla from '../Pantallas/PantallaGeo'
 
 //NAVEGACION
@@ -35,11 +34,10 @@ export default function AppNavigator({ user }) {
                 <>
                     <Stack.Screen name="Inicio" component={Inicio} />
                     <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
-                    <Stack.Screen name="MisViajes" component={MisViajes} />
-                    <Stack.Screen name="NuevoViaje" component={NuevoViaje} />
+                    <Stack.Screen name="Entregas" component={Entregas} />
                     <Stack.Screen name="Mapa" component={Mapa} />
                     <Stack.Screen name="TuPerfil" component={TuPerfil} />
-                    <Stack.Screen name="ViajesPantalla" component={ViajesPantalla} />
+                    <Stack.Screen name="Delivery" component={Delivery} />
                     <Stack.Screen name="GeoPantalla" component={GeoPantalla} />
                 </>
             )}

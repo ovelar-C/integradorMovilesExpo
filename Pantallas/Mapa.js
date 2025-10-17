@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 
 
 //gracias chatgept
+//REHACER MAPA, CLASE PASADA
 
 /**
  *  MapView: componente para mostrar el mapa.
