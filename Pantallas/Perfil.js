@@ -4,11 +4,10 @@ import { obtenerPerfil } from "../servicios/servicioFirebase";
 import { auth } from '../firebase';
 import * as SecureStore from 'expo-secure-store';
 
-
-
 export default function TuPerfil({ navigation }) {
     const [datos, setDatos] = useState(null);
     const [coordenadas, setCoordenadas] = useState(null);
+    const [suscripcion, setSuscripcion] = useState(null);
 
     useEffect(() => {
         const user = auth.currentUser;
@@ -19,10 +18,8 @@ export default function TuPerfil({ navigation }) {
             console.log("No hay usuario autenticado");
         }
         cargarUbicacion();
-        //listarDatosSecureStore();
-
     }, []);
-
+    //obtener datos de las coordenadas
     const cargarUbicacion = async () => {
         try {
             const coords = await SecureStore.getItemAsync('ubicacion');
@@ -32,8 +29,7 @@ export default function TuPerfil({ navigation }) {
             console.log("error al obtener ubicacion")
         }
     }
-
-    //firebase no anda D:
+    //cargar los datos del usuario
     const cargarPerfil = async (uid) => {
         console.log("UID en cargarperfil:", uid);
         try {
@@ -48,7 +44,7 @@ export default function TuPerfil({ navigation }) {
             obtenerDatosSecure(uid);
         }
     }
-
+    //si firebase no funciona obtenemos lo datos del SecureStore
     const obtenerDatosSecure = async (uid) => {
 
         console.log("UID en obtenerDatosSecure:", uid);
@@ -64,27 +60,37 @@ export default function TuPerfil({ navigation }) {
             console.log("error al obtner los datos de securestore");
         }
     }
+    //limpiamos las coordenadas del SecureStore
+    const limpiarUbicacion = () => {
+        setCoordenadas(null);
+        if (suscripcion) {
+            suscripcion.remove();
+            setSuscripcion(null);
+        }
+        SecureStore.deleteItemAsync('ubicacion');
+    };
 
     return (
         <View style={styles.contenedor}>
+
             <View style={styles.datos}>
                 <Text style={styles.datosTexto}>
-                    Email: {auth.currentUser ? auth.currentUser.email : "No autenticado"}
+                    EMAIL: {auth.currentUser ? auth.currentUser.email : "No autenticado"}
                 </Text>
-                <Text style={styles.datosTexto}>Nombre: {datos?.nombre}</Text>
-                <Text style={styles.datosTexto}>Descripción: {datos?.descripcion}</Text>
-                <Text style={styles.datosTexto}>Edad: {datos?.edad}</Text>
+                <Text style={styles.datosTexto}>NOMBRE: {datos?.nombre}</Text>
+                <Text style={styles.datosTexto}>EDAD: {datos?.edad}</Text>
+                <Text style={styles.datosTexto}>DESCRIPCION: {datos?.descripcion}</Text>
 
-
-                {coordenadas ? (
-                    <>
-                        <Text style={styles.datosTexto}>Latitud: {coordenadas.latitude}</Text>
-                        <Text style={styles.datosTexto}>Longitud: {coordenadas.longitude}</Text>
-                    </>
-                ) : (
-                    <Text style={styles.datosTexto}>No hay coordenadas almacenadas</Text>
-                )}
-
+                <View style={styles.datosCoords}>
+                    {coordenadas ? (
+                        <>
+                            <Text style={styles.datosTexto}>Latitud: {coordenadas.latitude}</Text>
+                            <Text style={styles.datosTexto}>Longitud: {coordenadas.longitude}</Text>
+                        </>
+                    ) : (
+                        <Text style={styles.datosTexto}>No hay coordenadas almacenadas</Text>
+                    )}
+                </View>
 
             </View>
 
@@ -92,6 +98,13 @@ export default function TuPerfil({ navigation }) {
                 onPress={() => navigation.navigate('EditarPerfil')} >
                 <Text style={styles.botonText}>EDITAR PERFIL</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.boton}
+                onPress={limpiarUbicacion}>
+                <Text style={styles.botonText}>BORRAR UBICACIÓN</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.boton}
                 onPress={() => navigation.navigate('Inicio')} >
                 <Text style={styles.botonText}> VOLVER</Text>
@@ -103,44 +116,49 @@ export default function TuPerfil({ navigation }) {
 const styles = StyleSheet.create({
     contenedor: {
         flex: 1,
-        justifyContent: 'flex-start',
-        alignContent: 'center',
         backgroundColor: 'yellow',
+        padding: 20,
     },
     datos: {
-        backgroundColor: '#9e69e2ff',
-        textAlign: 'center',
-        alignContent: 'center',
-        margin: 20,
-        marginTop: 20,
-        marginBottom: 10,
-        borderRadius: 20,
-
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 4,
     },
     datosTexto: {
-        color: 'white',
         fontSize: 16,
-        fontWeight: 'bold',
-        textAlign: 'left',
+        color: '#2c3e50',
+        fontWeight: '500',
         margin: 10,
+        alignContent: 'center',
 
     },
-
+    datosCoords: {
+        marginTop: 15,
+        padding: 12,
+        backgroundColor: '#eaf0f6',
+        borderRadius: 12,
+    },
     boton: {
-        backgroundColor: '#007AFF',
-        padding: 2,
-        borderRadius: 20,
+        backgroundColor: '#3498db',
+        paddingVertical: 14,
+        borderRadius: 30,
         alignItems: 'center',
-        margin: 20,
-        marginVertical: 5,
+        marginBottom: 12,
+        shadowColor: '#3498db',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 3,
     },
     botonText: {
         color: 'white',
         fontSize: 16,
-        fontWeight: 'bold',
-        marginTop: 10,
-        marginBottom: 10,
+        fontWeight: '600',
     },
-
-
 });

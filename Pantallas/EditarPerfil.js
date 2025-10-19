@@ -1,8 +1,10 @@
-import { Text, View, TextInput, Button, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import { useState } from "react";
 import { auth } from "../firebase";
 import { actualizarPerfil } from "../servicios/servicioFirebase";
 import { validarEdad } from "../validaciones y Permisos/validar";
+import Modal from "react-native-modal";
+
 
 export default function EditarPerfil({ navigation }) {
     const [nombre, setNombre] = useState('');
@@ -10,45 +12,55 @@ export default function EditarPerfil({ navigation }) {
     const [descripcion, setDescripcion] = useState('');
     const [guardando, setGuardando] = useState(false);
 
-    //arreglar
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+
+    const toggleModal = () => setModalVisible(!isModalVisible);
+
+    const showModal = (message) => {
+        setModalMessage(message);
+        toggleModal();
+    };
+
+    //guardamos los datos editados
     const guardar = async () => {
         const uid = auth.currentUser?.uid; // Obtenemos el UID del usuario autenticado
         if (!uid) {
-            Alert.alert("error", "no hay usuario autenticado");
+            showModal("error", "no hay usuario autenticado");
             return;
         }
 
         const datos = { nombre, edad, descripcion };
-        if(!nombre && edad){
-            Alert.alert("los campos nombre y edad son obligatorios");
+        if (!nombre && edad) {
+            showModal("los campos nombre y edad son obligatorios!");
             return;
         }
         if (!nombre && !edad && !descripcion) {
-            Alert.alert("completa los campos por favor te lo suplico");
+            showModal("Complete los campos por favor te lo suplico");
             return
         }
         if (!validarEdad(edad)) {
-            Alert.alert("Por favor, ingresa una edad válida.");
+            showModal("Por favor, ingresa una edad válida!");
             return;
         }
         setGuardando(true);
 
         try {
             await actualizarPerfil(uid, datos);
-            Alert.alert("perfecto", "perfil guardado");
+            showModal("Perfecto", "Perfil guardado!");
             setGuardando(false);
         } catch (error) {
             console.log("error al guardar perfil", error);
-            Alert.alert("error", "error al guardar perfil");
+            showModal("ERROR", "error al guardar perfil");
             setGuardando(false);
 
         }
     };
 
-
     return (
         <View style={styles.contenedor}>
-            <Text style={styles.titulo}>EDITAR PERFIL</Text>
+
+            <Text style={styles.titulo}>✍️​ EDITAR PERFIL ✍️​</Text>
             <TextInput
                 style={styles.input}
                 placeholder="Nuevo nombre"
@@ -66,7 +78,7 @@ export default function EditarPerfil({ navigation }) {
                 style={styles.input}
                 placeholder="Nueva descripcion"
                 value={descripcion}
-                onChangeText={setDescripcion} 
+                onChangeText={setDescripcion}
             />
 
             <TouchableOpacity style={[styles.boton, guardando ? styles.botonGuardando : styles.boton]}
@@ -81,20 +93,30 @@ export default function EditarPerfil({ navigation }) {
                 <Text style={styles.botonText}> VOLVER</Text>
             </TouchableOpacity>
 
+            <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalText}>{modalMessage}</Text>
+
+                    <TouchableOpacity style={styles.modalText}
+                        onPress={toggleModal}
+                        title="cerrar">
+                    </TouchableOpacity>
+                </View>
+            </Modal>
+
         </View>
     );
 }
 const styles = StyleSheet.create({
     contenedor: {
         flex: 1,
-        justifyContent: 'flex-start',
-        alignContent: 'center',
         backgroundColor: 'yellow',
+        padding: 20,
     },
     titulo: {
         textAlign: 'center',
         padding: 20,
-        backgroundColor: '#677c08',
+        backgroundColor: '#e27720ff',
         color: 'white',
         padding: 15,
         margin: 5,
@@ -102,26 +124,60 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         borderRadius: 20,
         fontWeight: 'bold',
+        fontSize: 20,
+    },
+    input: {
+        backgroundColor: '#ffffff',
+        borderRadius: 10,
+        paddingHorizontal: 15,
+        paddingVertical: 12,
+        fontSize: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#dcdcdc',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
     },
     boton: {
-        backgroundColor: '#007AFF',
-        padding: 10,
-        borderRadius: 20,
+        backgroundColor: '#3498db',
+        paddingVertical: 14,
+        borderRadius: 30,
         alignItems: 'center',
-        margin: 20,
-        marginVertical: 5,
+        marginBottom: 12,
+        shadowColor: '#3498db',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 3,
+    },
+    botonGuardando: {
+        backgroundColor: '#27ae60',
     },
     botonText: {
         color: 'white',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: '600',
     },
-    input: {
-        padding: 20,
-        margin: 10,
+    modalContent: {
         backgroundColor: 'white',
+        padding: 25,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5,
     },
-    botonGuardando:{
-        backgroundColor: 'green',
-    }
+    modalText: {
+        fontSize: 16,
+        color: '#0b9ff5ff',
+        textAlign: 'center',
+        fontWeight: 'bold',
+        margin: 5
+    },
 });

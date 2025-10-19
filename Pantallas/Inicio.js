@@ -2,12 +2,9 @@ import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { auth, db } from '../firebase';
 import * as SecureStore from 'expo-secure-store';
 
-
-
-//SACAR EL BOTON DE UBICACIONES
-
 export default function Inicio({ navigation }) {
 
+    //cerrar sesión
     const cerrarSesion = async () => {
         console.log("funcion cerrar sesion")
         try {
@@ -17,17 +14,16 @@ export default function Inicio({ navigation }) {
         } catch (error) {
             console.error("Error al cerrar sesión:", error);
         }
-
     }
     return (
         <View style={styles.contenedor}>
             <Text style={styles.titulo}>
-                BIENVENIDO A INICIO
+               🏡​ BIENVENIDO A INICIO 🏡​
             </Text>
 
             <TouchableOpacity style={styles.boton}
                 onPress={() => navigation.navigate('TuPerfil')}>
-                <Text style={styles.botonText}>TU PERFIL</Text>
+                <Text style={styles.botonText}>MI PERFIL</Text>
             </TouchableOpacity>
 
 
@@ -41,14 +37,10 @@ export default function Inicio({ navigation }) {
                 <Text style={styles.botonText}>CERRAR SESION</Text>
             </TouchableOpacity>
 
-            <Image
-                source={require('../assets/alien.gif')}
-                style={styles.alien}
-            />
-
         </View>
     )
 }
+
 const styles = StyleSheet.create({
     contenedor: {
         flex: 1,
@@ -59,7 +51,7 @@ const styles = StyleSheet.create({
     titulo: {
         textAlign: 'center',
         padding: 20,
-        backgroundColor: '#677c08',
+        backgroundColor: '#e27720ff',
         color: 'white',
         padding: 15,
         margin: 5,
@@ -67,9 +59,10 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         borderRadius: 20,
         fontWeight: 'bold',
+        fontSize:20,
     },
     boton: {
-        backgroundColor: '#007AFF',
+        backgroundColor: '#3498db',
         padding: 10,
         borderRadius: 20,
         alignItems: 'center',
