@@ -38,14 +38,16 @@ npm start
 ## 🚚 Estructura del proyecto
 
 📦 IntegradorDelivery/
-├── 📁 assets/                      @Recursos
-└── 📁 navegacion/                  @Manejo de las pantallas
-├── 📁 Pantallas/                   @Pantallas principales
-└── 📁 servicios/                   @servicios de firebase
-├── 📁 validaciones y permisos/     @validar los datos
-└── 📄 App.js                       @Entrada principal de la app
-├── 📄 firebase.js                  @Configuracion de Firebase
-└── 📄 package.json
+├── 📁 assets/                      @   Recursos
+└── 📁 navegacion/                  @   Manejo de las pantallas
+├── 📁 Pantallas/                   @   Pantallas principales
+└── 📁 servicios/                   @   servicios de firebase
+├── 📁 validaciones y permisos/     @   validar los datos
+|   └── 📄 guardar.js               @   guarda la ubicacion
+|   └── 📄 permisos.js              @   solicita los permisos necesarios
+|   └── 📄 validar.js               @   validar los datos del usuario
+└── 📄 App.js                       @   Entrada principal de la app
+├── 📄 firebase.js                  @   Configuracion de Firebase
 └── 📄 README.md
 
 

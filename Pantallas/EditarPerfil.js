@@ -1,10 +1,9 @@
-import { Text, View, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useState } from "react";
 import { auth } from "../firebase";
 import { actualizarPerfil } from "../servicios/servicioFirebase";
 import { validarEdad } from "../validaciones y Permisos/validar";
 import Modal from "react-native-modal";
-
 
 export default function EditarPerfil({ navigation }) {
     const [nombre, setNombre] = useState('');
@@ -16,168 +15,179 @@ export default function EditarPerfil({ navigation }) {
     const [modalMessage, setModalMessage] = useState('');
 
     const toggleModal = () => setModalVisible(!isModalVisible);
-
     const showModal = (message) => {
         setModalMessage(message);
         toggleModal();
     };
 
-    //guardamos los datos editados
     const guardar = async () => {
-        const uid = auth.currentUser?.uid; // Obtenemos el UID del usuario autenticado
+        const uid = auth.currentUser?.uid;
         if (!uid) {
-            showModal("error", "no hay usuario autenticado");
+            showModal("No hay usuario autenticado");
             return;
         }
 
-        const datos = { nombre, edad, descripcion };
-        if (!nombre && edad) {
-            showModal("los campos nombre y edad son obligatorios!");
+        if (!nombre || !edad) {
+            showModal("Los campos nombre y edad son obligatorios");
             return;
-        }
-        if (!nombre && !edad && !descripcion) {
-            showModal("Complete los campos por favor te lo suplico");
-            return
         }
         if (!validarEdad(edad)) {
-            showModal("Por favor, ingresa una edad válida!");
+            showModal("Por favor, ingresa una edad válida");
             return;
         }
+
         setGuardando(true);
-
         try {
-            await actualizarPerfil(uid, datos);
-            showModal("Perfecto", "Perfil guardado!");
-            setGuardando(false);
+            await actualizarPerfil(uid, { nombre, edad, descripcion });
+            showModal("✅ Perfil guardado con éxito");
         } catch (error) {
-            console.log("error al guardar perfil", error);
-            showModal("ERROR", "error al guardar perfil");
+            showModal("❌ Error al guardar el perfil");
+        } finally {
             setGuardando(false);
-
         }
     };
 
     return (
-        <View style={styles.contenedor}>
+        <View style={styles.screen}>
+            <View style={styles.topBlob}/>
+            <View style={styles.bottomBlob}/>
 
-            <Text style={styles.titulo}>✍️​ EDITAR PERFIL ✍️​</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Nuevo nombre"
-                value={nombre}
-                onChangeText={setNombre} />
+            <View style={styles.container}>
+                <Text style={styles.title}>✍️ Editar Perfil</Text>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Edad"
-                value={edad}
-                onChangeText={setEdad}
-                keyboardType="numeric" />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Nuevo nombre"
+                    value={nombre}
+                    onChangeText={setNombre}
+                />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Nueva descripcion"
-                value={descripcion}
-                onChangeText={setDescripcion}
-            />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Edad"
+                    keyboardType="numeric"
+                    value={edad}
+                    onChangeText={setEdad}
+                />
 
-            <TouchableOpacity style={[styles.boton, guardando ? styles.botonGuardando : styles.boton]}
-                onPress={() => guardar()} >
-                <Text style={styles.botonText}>
-                    {guardando ? 'GUARDANDO CAMBIOS' : 'GUARDAR CAMBIOS'}
-                </Text>
-            </TouchableOpacity>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Nueva descripción"
+                    value={descripcion}
+                    onChangeText={setDescripcion}
+                />
 
-            <TouchableOpacity style={styles.boton}
-                onPress={() => navigation.goBack()}>
-                <Text style={styles.botonText}> VOLVER</Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, styles.buttonPrimary]} onPress={guardar}>
+                    <Text style={styles.buttonText}>
+                        {guardando ? "GUARDANDO..." : "GUARDAR CAMBIOS"}
+                    </Text>
+                </TouchableOpacity>
 
+                <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => navigation.goBack()}>
+                    <Text style={styles.buttonText}>VOLVER</Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* MODAL */}
             <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalText}>{modalMessage}</Text>
-
-                    <TouchableOpacity style={styles.modalText}
-                        onPress={toggleModal}
-                        title="cerrar">
+                    <TouchableOpacity style={styles.modalButton} onPress={toggleModal}>
+                        <Text style={styles.modalButtonText}>Cerrar</Text>
                     </TouchableOpacity>
                 </View>
             </Modal>
-
         </View>
     );
 }
+
 const styles = StyleSheet.create({
-    contenedor: {
+    screen: {
         flex: 1,
-        backgroundColor: 'yellow',
-        padding: 20,
+        backgroundColor: '#FFF6E6',
+        alignItems: 'center',
     },
-    titulo: {
+    topBlob: {
+        position: 'absolute',
+        top: -70,
+        left: -60,
+        width: 200,
+        height: 200,
+        backgroundColor: '#FFD7A8',
+        borderRadius: 120,
+        opacity: 0.95,
+    },
+    bottomBlob: {
+        position: 'absolute',
+        bottom: -80,
+        right: -80,
+        width: 260,
+        height: 260,
+        backgroundColor: '#B9F5E0',
+        borderRadius: 140,
+        opacity: 0.95,
+    },
+    container: {
+        width: '90%',
+        marginTop: 80,
+        padding: 22,
+        borderRadius: 22,
+        backgroundColor: 'rgba(255,255,255,0.85)',
+        elevation: 6,
+    },
+    title: {
+        fontSize: 22,
+        fontWeight: '800',
+        color: '#3b2e5a',
         textAlign: 'center',
-        padding: 20,
-        backgroundColor: '#e27720ff',
-        color: 'white',
-        padding: 15,
-        margin: 5,
-        marginTop: 20,
-        marginBottom: 20,
-        borderRadius: 20,
-        fontWeight: 'bold',
-        fontSize: 20,
+        marginBottom: 16,
     },
     input: {
         backgroundColor: '#ffffff',
-        borderRadius: 10,
+        borderRadius: 14,
         paddingHorizontal: 15,
         paddingVertical: 12,
         fontSize: 16,
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: '#dcdcdc',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 1,
+        marginBottom: 14,
     },
-    boton: {
-        backgroundColor: '#3498db',
+    button: {
         paddingVertical: 14,
-        borderRadius: 30,
+        borderRadius: 40,
         alignItems: 'center',
-        marginBottom: 12,
-        shadowColor: '#3498db',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 3,
+        marginVertical: 8,
     },
-    botonGuardando: {
-        backgroundColor: '#27ae60',
+    buttonPrimary: {
+        backgroundColor: '#6C5CE7', // MORADO
     },
-    botonText: {
+    buttonSecondary: {
+        backgroundColor: '#FF7675', // ROSA
+    },
+    buttonText: {
         color: 'white',
+        fontWeight: '800',
         fontSize: 16,
-        fontWeight: '600',
     },
     modalContent: {
         backgroundColor: 'white',
         padding: 25,
-        borderRadius: 15,
+        borderRadius: 16,
         alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
     },
     modalText: {
-        fontSize: 16,
-        color: '#0b9ff5ff',
+        fontSize: 17,
+        fontWeight: '600',
         textAlign: 'center',
-        fontWeight: 'bold',
-        margin: 5
+        marginBottom: 18,
     },
+    modalButton: {
+        backgroundColor: '#6C5CE7',
+        paddingVertical: 10,
+        paddingHorizontal: 26,
+        borderRadius: 30,
+    },
+    modalButtonText: {
+        color: 'white',
+        fontWeight: '700',
+        fontSize: 15,
+    }
 });

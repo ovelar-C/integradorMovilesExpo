@@ -7,7 +7,6 @@ export default function ViajesPantalla({ navigation }) {
     const [coords, setCoords] = useState([]);
     const [mostrarLista, setMostrarLista] = useState(false);
 
-    //obtenemos el registro de las coordenadas
     const obtenerCoords = async () => {
         const uid = auth.currentUser?.uid;
         if (!uid) return;
@@ -22,53 +21,33 @@ export default function ViajesPantalla({ navigation }) {
             setCoords(coordsArray);
             setMostrarLista(true);
         } catch (error) {
-            console.log('Error al obtener las notas.');
+            console.log('Error al obtener las coordenadas.');
         }
     };
-    //mostramos los datos
+
     const renderItem = ({ item }) => (
-        <View style={styles.coordItem}>
-            <Text>Latitud: {item.latitude}</Text>
-            <Text>Longitud: {item.longitude}</Text>
-            <Text>Fecha: {new Date(item.timestamp.seconds * 1000).toLocaleString()}</Text>
+        <View style={styles.card}>
+            <Text style={styles.cardText}>📍 Latitud: {item.latitude}</Text>
+            <Text style={styles.cardText}>📍 Longitud: {item.longitude}</Text>
+            <Text style={styles.cardFecha}>🕒 {new Date(item.timestamp.seconds * 1000).toLocaleString()}</Text>
         </View>
     );
 
     return (
-        <View style={styles.contenedor}>
-            <Text style={styles.titulo}>
-                🛵 ​ PANTALLA DE ENTREGAS  🛵
-            </Text>
-            <View style={styles.contenedorBoton}>
-                <TouchableOpacity style={styles.boton}
-                    onPress={obtenerCoords}>
-                    <Text style={styles.botonText}> REGISTRO DE ENTREGAS</Text>
-                </TouchableOpacity>
+        <View style={styles.screen}>
+            {/* Blobs decorativos */}
+            <View style={styles.topBlob} />
+            <View style={styles.bottomBlob} />
 
-                <TouchableOpacity style={styles.boton}
-                    onPress={() => navigation.navigate('Entregas')}
-                >
-                    <Text style={styles.botonText}>NUEVO DELIVERY</Text>
-                </TouchableOpacity>
+            <View style={styles.container}>
+                <Text style={styles.title}>🛵 Historial de Entregas 🛵</Text>
 
-                <TouchableOpacity style={styles.boton}
-                    onPress={() => navigation.goBack()}>
-                    <Text style={styles.botonText}> VOLVER</Text>
-                </TouchableOpacity>
-            </View>
-
-            {!mostrarLista ? (
-                <View style={styles.contenedorCerrar}>
-                    <Text style={styles.emote}>🛵</Text>
-
-                </View>
-            ) : (
-                <View style={styles.contenedorFlatlist}>
-                    <TouchableOpacity style={styles.botonCerrar} onPress={() => setMostrarLista(false)}>
-                        <Text style={styles.botonText}> CERRAR</Text>
-                    </TouchableOpacity>
-
-                    {mostrarLista && (
+                {!mostrarLista ? (
+                    <>
+                        <Text style={styles.placeholder}>Pulsa "Registro de Entregas" para ver tus viajes</Text>
+                    </>
+                ) : (
+                    <>
                         <FlatList
                             data={coords}
                             keyExtractor={(item) => item.id}
@@ -76,111 +55,163 @@ export default function ViajesPantalla({ navigation }) {
                             ListEmptyComponent={<Text style={styles.vacioText}>No hay registros aún.</Text>}
                             contentContainerStyle={coords.length === 0 ? styles.flatListVacio : styles.flatList}
                         />
-                    )}
-                </View>
-            )}
+                        <TouchableOpacity
+                            style={[styles.bubble, styles.bubbleDanger]}
+                            onPress={() => setMostrarLista(false)}
+                        >
+                            <Text style={styles.bubbleText}>CERRAR LISTA</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
+
+                {/* Botones principales */}
+                <TouchableOpacity
+                    style={[styles.bubble, styles.bubblePrimary]}
+                    onPress={obtenerCoords}
+                >
+                    <Text style={styles.bubbleText}>REGISTRO DE ENTREGAS</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.bubble, styles.bubbleAccent]}
+                    onPress={() => navigation.navigate('Entregas')}
+                >
+                    <Text style={styles.bubbleText}>NUEVO DELIVERY</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.bubble, styles.bubbleDanger]}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Text style={styles.bubbleText}>VOLVER</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
-const styles = StyleSheet.create({
-    contenedor: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        alignContent: 'center',
-        backgroundColor: 'yellow',
-        padding: 20,
-    },
-    titulo: {
-        textAlign: 'center',
-        padding: 10,
-        backgroundColor: '#e27720ff',
-        color: 'white',
-        padding: 15,
-        marginTop: 10,
-        marginBottom: 10,
-        borderRadius: 20,
-        fontWeight: 'bold',
-        fontSize: 20,
-    },
-    contenedorBoton: {
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',                
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-    },
-    boton: {
-        backgroundColor: '#3498db',
-        padding: 10,
-        margin: 5,
-        paddingHorizontal: 12,   
-        borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#3498db',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3,
-        flexShrink: 1, 
-    },
-    botonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-    contenedorCerrar: {
-        height: 140,
-        width:90,
-        backgroundColor: '#e7db2b',
-        position: 'absolute',
-        top: 120,       
-        right: 20,     
-        padding: 10,
-        borderRadius: 20,
-        zIndex: 10, 
-    },
-    emote:{
-        fontSize:60,
-    },
-    botonCerrar: {
-        position: 'absolute',
-        top: -115,       // espacio desde arriba
-        right: 15,     // espacio desde la derecha
-        backgroundColor: 'red',
-        padding: 10,
-        borderRadius: 20,
-        zIndex: 10,    // para que quede encima de otros elementos
-    },
-    coordItem: {
-        backgroundColor: '#f5f5f5',
-        padding: 15,
-        marginVertical: 8,
-        borderRadius: 25,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 2,
 
+const styles = StyleSheet.create({
+    screen: {
+        flex: 1,
+        backgroundColor: '#FFF6E6',
+        alignItems: 'center',
     },
-    contenedorFlatlist: {
-        height: 400,
-        borderRadius: 30
+    topBlob: {
+        position: 'absolute',
+        top: -70,
+        left: -60,
+        width: 200,
+        height: 200,
+        backgroundColor: '#FFD7A8',
+        borderRadius: 120,
+        transform: [{ rotate: '10deg' }],
+        opacity: 0.95,
+    },
+    bottomBlob: {
+        position: 'absolute',
+        bottom: -80,
+        right: -80,
+        width: 260,
+        height: 260,
+        backgroundColor: '#B9F5E0',
+        borderRadius: 140,
+        transform: [{ rotate: '-20deg' }],
+        opacity: 0.95,
+    },
+    container: {
+        width: '90%',
+        marginTop: 40,
+        alignItems: 'center',
+        padding: 18,
+        borderRadius: 22,
+        backgroundColor: 'rgba(255,255,255,0.85)',
+        elevation: 6,
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 12,
+    },
+    title: {
+        fontSize: 22,
+        fontWeight: '800',
+        color: '#3b2e5a',
+        marginBottom: 14,
+        textAlign: 'center',
+    },
+    placeholder: {
+        fontSize: 16,
+        color: '#555',
+        fontStyle: 'italic',
+        marginVertical: 20,
+        textAlign: 'center',
     },
     flatList: {
-        paddingBottom: 30,
-        paddingHorizontal: 5,
+        paddingBottom: 10,
+        width: '100%',
     },
     flatListVacio: {
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 20,
     },
     vacioText: {
-        fontSize: 18,
-        color: '#757575',
+        fontSize: 16,
+        color: '#777',
         fontStyle: 'italic',
+        marginVertical: 20,
+    },
+    card: {
+        backgroundColor: '#fff',
+        padding: 15,
+        marginVertical: 8,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOpacity: 0.12,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    cardText: {
+        fontSize: 15,
+        color: '#333',
+        marginBottom: 4,
+    },
+    cardFecha: {
+        fontSize: 13,
+        color: '#777',
+        marginTop: 4,
+    },
+    bubble: {
+        width: '100%',
+        paddingVertical: 16,
+        alignItems: 'center',
+        marginVertical: 10,
+        borderRadius: 40,
+        shadowColor: '#000',
+        shadowOpacity: 0.12,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 14,
+        elevation: 5,
+    },
+    bubblePrimary: {
+        backgroundColor: '#ff7675',
+        borderTopLeftRadius: 80,
+        borderBottomRightRadius: 14,
+    },
+    bubbleAccent: {
+        backgroundColor: '#6C5CE7',
+        borderTopRightRadius: 80,
+        borderBottomLeftRadius: 14,
+    },
+    bubbleDanger: {
+        backgroundColor: '#FF6B6B',
+        borderTopLeftRadius: 14,
+        borderBottomRightRadius: 80,
+    },
+    bubbleText: {
+        color: '#fff',
+        fontWeight: '800',
+        fontSize: 16,
+        letterSpacing: 0.7,
     },
 });

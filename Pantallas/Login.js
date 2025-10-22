@@ -7,14 +7,12 @@ import * as SecureStore from 'expo-secure-store';
 import { setDoc, doc } from 'firebase/firestore';
 import {validarEdad, verificarEmail} from '../validaciones y Permisos/validar'
 
-
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [nombre, setNombre] = useState('');
     const [edad, setEdad] = useState('');
     const [descripcion, setDescripcion] = useState('');
-
 
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
@@ -25,7 +23,7 @@ export default function Login() {
         setModalMessage(message);
         toggleModal();
     };
-    //guarda los datos en el SecureStore
+
     const guardarDatosUsuario = async (uid, nombre, email, edad, descripcion) => {
         try {
             await SecureStore.setItemAsync('uid', uid);
@@ -39,7 +37,7 @@ export default function Login() {
             console.log('error al guardar datos en SecureStore:', error);
         }
     };
-    //iniciar sesión con Email y Password
+
     const signIn = async () => {
         if (!email || !password) {
             showModal("Por favor, completa los campos Email y Contraseña");
@@ -54,9 +52,8 @@ export default function Login() {
             showModal("ERROR AL INICIAR SESÍON: " + error.message);
         }
     };
-    //crear cuenta
+
     const signUp = async () => {
-        console.log("DENTRO DE SIGN UP")
         if (!email || !password || !nombre || !edad || !descripcion) {
             showModal("Por favor complete todos los campos!");
             return;
@@ -72,7 +69,6 @@ export default function Login() {
         }
 
         try {
-            console.log("dentro del try de SIGN UP");
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
@@ -84,177 +80,178 @@ export default function Login() {
                     descripcion: descripcion,
                 });
             } catch (error) {
-                console.log("error al usar setDoc".error);
+                console.log("error al usar setDoc", error);
             }
 
-            console.log("antes de guardarDatosUsuarios");
             await guardarDatosUsuario(user.uid, nombre, email, edad, descripcion);
-            console.log('DATOS ANTES DE guardar en SecureStore:', { uid, nombre, email, edad, descripcion });
-
             showModal("Cuenta creada correctamente!");
         } catch (error) {
             showModal("ERROR AL CREAR LA CUENTA: " + error.message);
         }
-        console.log("ultima DE SIGN UP")
-
     };
 
     return (
-        <View style={styles.contenedor}>
-            <View style={styles.contenedorTitulo}>
-                <Text style={styles.titulo}>
-                    LOGIN
-                </Text>
+        <View style={styles.screen}>
+            {/* decorative blobs */}
+            <View style={styles.blobTop} />
+            <View style={styles.blobBottom} />
+
+            <View style={styles.card}>
+                <Text style={styles.header}>¡Hola! 👋</Text>
+                <Text style={styles.subheader}>Crea tu cuenta o inicia sesión</Text>
+
+                <Text style={styles.label}>NOMBRE</Text>
+                <TextInput value={nombre} onChangeText={setNombre} style={styles.input} />
+
+                <Text style={styles.label}>EMAIL</Text>
+                <TextInput value={email} onChangeText={setEmail} style={styles.input} keyboardType="email-address" />
+
+                <Text style={styles.label}>EDAD</Text>
+                <TextInput value={edad} onChangeText={setEdad} style={styles.input} keyboardType="numeric" />
+
+                <Text style={styles.label}>CONTRASEÑA</Text>
+                <TextInput value={password} onChangeText={setPassword} style={styles.input} secureTextEntry />
+
+                <Text style={styles.label}>DESCRIPCIÓN</Text>
+                <TextInput value={descripcion} onChangeText={setDescripcion} style={styles.input} />
+
+                <TouchableOpacity style={[styles.bubble, styles.primaryBubble]} onPress={signUp}>
+                    <Text style={styles.bubbleText}>CREAR CUENTA</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.bubble, styles.secondaryBubble]} onPress={signIn}>
+                    <Text style={styles.bubbleText}>INICIAR SESIÓN</Text>
+                </TouchableOpacity>
             </View>
 
-            <View style={styles.textInput}>
-                <Text style={styles.textos}>NOMBRE:</Text>
-                <TextInput
-                    value={nombre}
-                    onChangeText={setNombre}
-                    style={styles.input}
-                />
-                <Text style={styles.textos}>EMAIL:</Text>
-
-                <TextInput
-                    value={email}
-                    onChangeText={setEmail}
-                    style={styles.input}
-                />
-                <Text style={styles.textos}>EDAD:</Text>
-
-                <TextInput
-                    value={edad}
-                    onChangeText={setEdad}
-                    style={styles.input}
-                    keyboardType="numeric"
-                />
-                <Text style={styles.textos}>CONTRASEÑA:</Text>
-
-                <TextInput
-                    value={password}
-                    onChangeText={setPassword}
-                    style={styles.input}
-                    secureTextEntry
-                />
-                <Text style={styles.textos}>DESCRIPCION:</Text>
-
-                <TextInput
-                    value={descripcion}
-                    onChangeText={setDescripcion}
-                    style={styles.input}
-                />
-            </View>
-
-            <TouchableOpacity style={styles.boton}
-                onPress={signUp}>
-                <Text style={styles.botonText}> CREAR CUENTA</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.boton}
-                onPress={signIn}>
-                <Text style={styles.botonText}> INICIAR SESIÓN</Text>
-            </TouchableOpacity>
-
-            {/* aca se personaliza los modales para las alertas */}
             <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalText}>{modalMessage}</Text>
-
-                    <TouchableOpacity style={styles.modalText}
-                        onPress={toggleModal}
-                        title="cerrar">
+                    <TouchableOpacity onPress={toggleModal} style={styles.modalClose}>
+                        <Text style={styles.modalCloseText}>Cerrar</Text>
                     </TouchableOpacity>
                 </View>
             </Modal>
-
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    contenedor: {
+    screen: {
         flex: 1,
-        justifyContent: 'center',
-        backgroundColor: '#f0d332ff',
-        paddingHorizontal: 20,
-        paddingTop: 40,
-    },
-    contenedorTitulo: {
-        marginBottom: 20,
+        backgroundColor: '#FFEEF6',
         alignItems: 'center',
-        backgroundColor: '#f5f0a9ff',
-        borderRadius: 39
+        justifyContent: 'center',
+        paddingHorizontal: 18,
     },
-    titulo: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#2c3e50',
-        margin: 10
-
+    blobTop: {
+        position: 'absolute',
+        top: -80,
+        left: -60,
+        width: 240,
+        height: 240,
+        backgroundColor: '#FFD6EC',
+        borderRadius: 140,
+        transform: [{ rotate: '15deg' }],
+        opacity: 0.9,
     },
-    textos: {
-        fontWeight: '600',
-        color: '#34495e',
-        alignSelf: 'flex-start',
-        marginLeft: 5,
-        marginTop: 10,
+    blobBottom: {
+        position: 'absolute',
+        bottom: -90,
+        right: -70,
+        width: 260,
+        height: 260,
+        backgroundColor: '#D6FFF2',
+        borderRadius: 140,
+        transform: [{ rotate: '-25deg' }],
+        opacity: 0.95,
     },
-    textInput: {
-        backgroundColor: '#ffffff',
-        borderRadius: 12,
-        padding: 20,
-        marginBottom: 30,
+    card: {
+        width: '100%',
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderRadius: 24,
+        padding: 18,
+        elevation: 6,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
+        shadowOpacity: 0.08,
+        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 12,
+    },
+    header: {
+        fontSize: 26,
+        fontWeight: '800',
+        color: '#3b2e5a',
+        marginBottom: 4,
+    },
+    subheader: {
+        color: '#6b5b7a',
+        marginBottom: 12,
+    },
+    label: {
+        marginTop: 10,
+        color: '#6b6b6b',
+        fontWeight: '700',
+        fontSize: 12,
+        letterSpacing: 0.6,
     },
     input: {
-        backgroundColor: '#ecf0f1',
-        borderRadius: 10,
-        width: '100%',
+        backgroundColor: '#FFF7FF',
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
         marginTop: 6,
-        marginBottom: 12,
-        padding: 12,
-        fontSize: 16,
         borderWidth: 1,
-        borderColor: '#d0d0d0',
+        borderColor: '#F0E6F6',
     },
-    boton: {
-        backgroundColor: '#3498db',
-        paddingVertical: 14,
-        borderRadius: 30,
+    bubble: {
+        marginTop: 14,
         alignItems: 'center',
-        marginBottom: 15,
-        shadowColor: '#3498db',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 3,
+        paddingVertical: 12,
+        paddingHorizontal: 22,
+        borderRadius: 30,
+        alignSelf: 'center',
+        width: '100%',
+        // asymmetric feel:
+        shadowColor: '#000',
+        shadowOpacity: 0.12,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 12,
+        elevation: 4,
     },
-    botonText: {
-        color: 'white',
-        fontSize: 17,
-        fontWeight: '600',
+    primaryBubble: {
+        backgroundColor: '#6C5CE7',
+        borderTopLeftRadius: 60,
+        borderBottomRightRadius: 10,
+    },
+    secondaryBubble: {
+        backgroundColor: '#00B894',
+        borderTopRightRadius: 60,
+        borderBottomLeftRadius: 10,
+    },
+    bubbleText: {
+        color: '#fff',
+        fontWeight: '800',
+        fontSize: 16,
+        letterSpacing: 0.6,
     },
     modalContent: {
         backgroundColor: 'white',
-        padding: 25,
-        borderRadius: 15,
+        padding: 22,
+        borderRadius: 16,
         alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
     },
     modalText: {
         fontSize: 16,
-        color: '#0b9ff5ff',
-        textAlign: 'center',
-        fontWeight: 'bold',
-        margin:5
+        marginBottom: 12,
+    },
+    modalClose: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        backgroundColor: '#6C5CE7',
+        borderRadius: 14,
+    },
+    modalCloseText: {
+        color: 'white',
+        fontWeight: '700',
     },
 });

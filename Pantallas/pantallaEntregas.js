@@ -2,12 +2,10 @@ import * as Location from 'expo-location';
 import { useState, useRef, useEffect } from "react";
 import { guardarUbicacion } from '../validaciones y Permisos/guardar';
 import { solicitarPermiso, solicitarPermisoCamara } from '../validaciones y Permisos/permisos';
-import { View, Text, TouchableOpacity, StyleSheet,Image} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { CameraView } from 'expo-camera';
-import { File, Directory, Paths } from 'expo-file-system';
 import MapView, { Marker } from 'react-native-maps';
 import Modal from "react-native-modal";
-
 import * as SecureStore from 'expo-secure-store';
 
 export default function Entregas({ navigation }) {
@@ -16,27 +14,18 @@ export default function Entregas({ navigation }) {
     const cameraRef = useRef(null);
     const [foto, setFoto] = useState(null);
 
-
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
 
     const toggleModal = () => setModalVisible(!isModalVisible);
+    const showModal = (message) => { setModalMessage(message); toggleModal(); };
 
-    const showModal = (message) => {
-        setModalMessage(message);
-        toggleModal();
-    };
-
-    useEffect(() => {
-        cargarUbicacion();
-
-    }, []);
+    useEffect(() => { cargarUbicacion(); }, []);
 
     const cargarUbicacion = async () => {
         try {
             const coords = await SecureStore.getItemAsync('ubicacion');
-            setCoords(JSON.parse(coords));
-
+            if (coords) setCoords(JSON.parse(coords));
         } catch (error) {
             console.log("error al obtener ubicacion")
         }
@@ -47,72 +36,43 @@ export default function Entregas({ navigation }) {
         const permisoUbicacion = await solicitarPermiso();
 
         if (!permisoUbicacion || !permisoCamara) {
-            console.log("permiso de ubi o camara denegado");
-            showModal("permiso de camara y de ubicacion denegado");
+            showModal("Permiso de cámara o ubicación denegado");
             return;
         }
-        try {
-            const ubicacion = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.High,
-            });
 
+        try {
+            const ubicacion = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
             setCoords(ubicacion.coords);
-            console.log('📍 Ubicación obtenida:', ubicacion.coords.latitude, ubicacion.coords.longitude);
             guardarUbicacion(ubicacion.coords);
             setShowCamera(true);
-
         } catch (error) {
-            console.error('Error al obtener ubicación:', error);
-            showModal('ERROR, No se pudo obtener la ubicación');
+            showModal('ERROR: No se pudo obtener la ubicación');
         }
     };
-    // Función principal para tomar y guardar foto
+
     const tomarYGuardarFoto = async () => {
-    console.log("dentro de tomar foto");
-
-    if (cameraRef.current) {
-        try {
-            const fotoTomada = await cameraRef.current.takePictureAsync();
-            console.log('Foto tomada:', fotoTomada.uri);
-
-            setFoto(fotoTomada.uri);
-
-            const directorioFotos = new Directory(Paths.document, 'mis_fotos');
-                directorioFotos.create({ idempotent: true });
-
-                const nombreArchivo = `foto_${Date.now()}.jpg`;
-                const archivoDestino = new File(directorioFotos, nombreArchivo);
-                const fotoTemporal = new File(fotoTomada.uri);
-
-                fotoTemporal.copy(archivoDestino);
-                showModal('¡Éxito!', `Foto guardada como: ${nombreArchivo}`);
-            setShowCamera(false);
-
-        } catch (error) {
-            console.error('Error al tomar la foto:', error);
-            showModal('Error al tomar la foto');
+        if (cameraRef.current) {
+            try {
+                const fotoTomada = await cameraRef.current.takePictureAsync();
+                setFoto(fotoTomada.uri);
+                showModal('Foto tomada con éxito 📸');
+                setShowCamera(false);
+            } catch (error) {
+                showModal('Error al tomar la foto');
+            }
         }
-    }
-};
+    };
 
     if (showCamera) {
         return (
-            <View style={styles.contenedorCamara}>
-                <CameraView style={styles.camara} ref={cameraRef} />
-
-                <View style={styles.controles}>
-                    <TouchableOpacity
-                        style={styles.botonCerrar}
-                        onPress={() => setShowCamera(false)}
-                    >
-                        <Text style={styles.textoBoton}>✕</Text>
+            <View style={styles.screen}>
+                <CameraView style={styles.camera} ref={cameraRef} />
+                <View style={styles.controls}>
+                    <TouchableOpacity style={styles.closeButton} onPress={() => setShowCamera(false)}>
+                        <Text style={styles.closeText}>✕</Text>
                     </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.botonCaptura}
-                        onPress={tomarYGuardarFoto}
-                    >
-                        <View style={styles.circuloCaptura} />
+                    <TouchableOpacity style={styles.captureButton} onPress={tomarYGuardarFoto}>
+                        <View style={styles.captureCircle} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -120,216 +80,102 @@ export default function Entregas({ navigation }) {
     }
 
     if (foto) {
-    return (
-        <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: 'white', marginBottom: 10 }}>Vista previa de la entrega</Text>
-            <Image
-                source={{ uri: foto }}
-                style={{ width: '90%', height: '70%', borderRadius: 10 }}
-            />
+        return (
+            <View style={styles.screen}>
+                <Text style={styles.title}>Vista previa de la entrega</Text>
+                <Image source={{ uri: foto }} style={styles.previewImage} />
 
-            <View style={{ flexDirection: 'row', marginTop: 20 }}>
                 <TouchableOpacity
-                    style={[styles.boton, { backgroundColor: '#27ae60' }]}
-                    onPress={() => {
-                        showModal('Entrega registrada con éxito ✅');
-                        setFoto(null);
-                    }}
+                    style={[styles.bubble, styles.bubblePrimary, { marginTop: 20 }]}
+                    onPress={() => { showModal('Entrega registrada ✅'); setFoto(null); }}
                 >
-                    <Text style={styles.botonText}>Guardar Entrega</Text>
+                    <Text style={styles.bubbleText}>Guardar Entrega</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.boton, { backgroundColor: '#e74c3c' }]}
-                    onPress={() => {
-                        setFoto(null);
-                        setShowCamera(true); // Volver a abrir camara
-                    }}
+                    style={[styles.bubble, styles.bubbleAccent]}
+                    onPress={() => { setFoto(null); setShowCamera(true); }}
                 >
-                    <Text style={styles.botonText}>Repetir Foto</Text>
+                    <Text style={styles.bubbleText}>Repetir Foto</Text>
                 </TouchableOpacity>
             </View>
-        </View>
-    );
-}
+        );
+    }
+
     return (
-        <View style={styles.contenedor}>
-            <Text style={styles.titulo}>
-                🧺​  NUEVA ENTREGA  🧺
-            </Text>
+        <View style={styles.screen}>
+            {/* decorative blobs */}
+            <View style={styles.topBlob} />
+            <View style={styles.bottomBlob} />
 
-            {coords ? (
+            <View style={styles.container}>
+                <Text style={styles.title}>🧺 Nueva Entrega</Text>
 
-                <MapView
-                    style={styles.map}
-                    region={{
-                        latitude: coords.latitude,
-                        longitude: coords.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                    }}
-                    showsUserLocation={true}
-                    followsUserLocation={true}
-                >
-                    <Marker
-                        coordinate={{
+                {coords ? (
+                    <MapView
+                        style={styles.map}
+                        region={{
                             latitude: coords.latitude,
                             longitude: coords.longitude,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
                         }}
-                        title="Ultima ubicación"
-                    />
-                </MapView>
-            ) : (
-                <View style={styles.sinUbicacionContenedor}>
-                    <Text style={styles.sinUbicacionTexto}>
-                        SIN REGISTRO DE UBICACIÓN
-                    </Text>
-                </View>
-            )}
+                        showsUserLocation
+                        followsUserLocation
+                    >
+                        <Marker
+                            coordinate={{
+                                latitude: coords.latitude,
+                                longitude: coords.longitude,
+                            }}
+                            title="Última ubicación"
+                        />
+                    </MapView>
+                ) : (
+                    <Text style={styles.placeholder}>SIN REGISTRO DE UBICACIÓN</Text>
+                )}
 
-            <View style={styles.botonesContenedor}>
-                <TouchableOpacity style={styles.boton}
-                    onPress={obtenerUbicacion}>
-                    <Text style={styles.botonText}> CAPTURAR ENTREGA</Text>
+                <TouchableOpacity style={[styles.bubble, styles.bubblePrimary]} onPress={obtenerUbicacion}>
+                    <Text style={styles.bubbleText}>CAPTURAR ENTREGA</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.boton}
-                    onPress={() => navigation.goBack()}>
-                    <Text style={styles.botonText}> VOLVER</Text>
+                <TouchableOpacity style={[styles.bubble, styles.bubbleDanger]} onPress={() => navigation.goBack()}>
+                    <Text style={styles.bubbleText}>VOLVER</Text>
                 </TouchableOpacity>
             </View>
 
-    <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
-        <View style={styles.modalContent}>
-            <Text style={styles.modalText}>{modalMessage}</Text>
-
-            <TouchableOpacity style={styles.modalText}
-                onPress={toggleModal}
-                title="cerrar">
-            </TouchableOpacity>
-        </View>
-    </Modal>
-
+            <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalText}>{modalMessage}</Text>
+                    <TouchableOpacity onPress={toggleModal}><Text style={styles.modalText}>Cerrar</Text></TouchableOpacity>
+                </View>
+            </Modal>
         </View>
     );
-
 }
+
 const styles = StyleSheet.create({
-    contenedor: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        alignContent: 'center',
-        backgroundColor: 'yellow',
-    },
-    titulo: {
-        textAlign: 'center',
-        padding: 20,
-        backgroundColor: '#e27720ff',
-        color: 'white',
-        padding: 15,
-        margin: 5,
-        marginHorizontal: 20,
-        marginTop: 20,
-        marginBottom: 20,
-        borderRadius: 20,
-        fontWeight: 'bold',
-        fontSize: 20,
-    },
-    boton: {
-        backgroundColor: '#3498db',
-        padding: 10,
-        borderRadius: 20,
-        alignItems: 'center',
-        margin: 20,
-        marginVertical: 5,
-    },
-    botonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    map: {
-        width: '100%',
-        height: 350,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#dee2e6',
-        marginTop: 15,
-        marginBottom: 10,
-    },
-
-    contenedorCamara: {
-        flex: 1,
-    },
-    camara: {
-        flex: 1,
-    },
-    controles: {
-        position: 'absolute',
-        bottom: 50,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 30,
-    },
-    botonCerrar: {
-        backgroundColor: 'rgba(255, 99, 99, 1)',
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    botonCaptura: {
-        backgroundColor: 'rgba(255,255,255,0.3)',
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    circuloCaptura: {
-        backgroundColor: 'white',
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-    },
-    sinUbicacionContenedor: {
-        paddingHorizontal: 20,
-        marginTop: 30,
-    },
-    sinUbicacionTexto: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#333',
-        backgroundColor: '#e7dec3ff',
-        padding: 15,
-        borderRadius: 10,
-    },
-    botonesContenedor: {
-        paddingVertical: 10,
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        padding: 25,
-        borderRadius: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    modalText: {
-        fontSize: 16,
-        color: '#0b9ff5ff',
-        textAlign: 'center',
-        fontWeight: 'bold',
-        margin:5
-    },
-
-})
+    screen: { flex: 1, backgroundColor: '#FFF6E6', alignItems: 'center' },
+    topBlob: { position: 'absolute', top: -70, left: -60, width: 200, height: 200, backgroundColor: '#FFD7A8', borderRadius: 120, transform: [{ rotate: '10deg' }], opacity: 0.95 },
+    bottomBlob: { position: 'absolute', bottom: -80, right: -80, width: 260, height: 260, backgroundColor: '#B9F5E0', borderRadius: 140, transform: [{ rotate: '-20deg' }], opacity: 0.95 },
+    container: { width: '90%', marginTop: 40, alignItems: 'center', padding: 18, borderRadius: 22,
+         backgroundColor: 'rgba(255,255,255,0.85)',
+          elevation: 6, shadowColor: '#000', shadowOpacity: 0.08, shadowOffset: { width: 0, height: 6 }, shadowRadius: 12 },
+    title: { fontSize: 22, fontWeight: '800', color: '#3b2e5a', marginBottom: 14, textAlign: 'center',marginTop:22 },
+    map: { width: '100%', height: 250, borderRadius: 15, marginVertical: 10 },
+    placeholder: { fontSize: 16, color: '#555', fontStyle: 'italic', marginVertical: 20, textAlign: 'center' },
+    camera: { flex: 1, width: '100%' },
+    controls: { position: 'absolute', bottom: 50, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 30 },
+    closeButton: { backgroundColor: '#FF6B6B', width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
+    closeText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+    captureButton: { backgroundColor: 'rgba(255,255,255,0.3)', width: 70, height: 70, borderRadius: 35, justifyContent: 'center', alignItems: 'center' },
+    captureCircle: { backgroundColor: 'white', width: 50, height: 50, borderRadius: 25 },
+    previewImage: { width: '90%', height: '50%', borderRadius: 15, marginVertical: 20 },
+    bubble: { width: '100%', paddingVertical: 16, alignItems: 'center', marginVertical: 10, borderRadius: 40, shadowColor: '#000', shadowOpacity: 0.12, shadowOffset: { width: 0, height: 8 }, shadowRadius: 14, elevation: 5 },
+    bubblePrimary: { backgroundColor: '#6C5CE7', borderTopLeftRadius: 80, borderBottomRightRadius: 14 },
+    bubbleAccent: { backgroundColor: '#6C5CE7', borderTopRightRadius: 80, borderBottomLeftRadius: 14 },
+    bubbleDanger: { backgroundColor: '#FF6B6B', borderTopLeftRadius: 14, borderBottomRightRadius: 80 },
+    bubbleText: { color: '#fff', fontWeight: '800', fontSize: 16, letterSpacing: 0.7 },
+    modalContent: { backgroundColor: 'white', padding: 25, borderRadius: 15, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 5 },
+    modalText: { fontSize: 16, color: '#0b9ff5ff', textAlign: 'center', fontWeight: 'bold', margin: 5 },
+});
