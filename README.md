@@ -38,7 +38,7 @@ npm start
 ## 🚚 Estructura del proyecto
 
 📦 IntegradorDelivery/
-├── 📁 assets/                      @   Recursos
+├── 📁 assets/                      @   CAPTURAS DE LA APP Y recursos
 └── 📁 navegacion/                  @   Manejo de las pantallas
 ├── 📁 Pantallas/                   @   Pantallas principales
 └── 📁 servicios/                   @   servicios de firebase
