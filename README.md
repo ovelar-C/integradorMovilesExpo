@@ -1,4 +1,4 @@
-# 🚚 Aplicación de Reparto / Delivery
+# 🚚 Aplicaciónnnnnn de Reparto / Delivery
 
 Aplicación móvil desarrollada con React Native + Expo que permite registrar entregas con fotografía y ubicación geográfica. Los repartidores pueden iniciar sesión, editar su perfil, ver un historial de entregas y registrar nuevas entregas capturando una foto del paquete y su ubicación en el mapa.
 
